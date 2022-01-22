@@ -2,8 +2,11 @@ import tape from 'tape'
 import Common, { Chain } from '@ethereumjs/common'
 import { SecureTrie as Trie } from 'merkle-patricia-tree'
 import { BN, toBuffer } from 'ethereumjs-util'
-import { setupPreConditions, makeTx, makeBlockFromEnv } from '../../util'
+import { setupPreConditions, makeTx, makeBlockFromEnv, getVerklePreState } from '../../util'
 import type { InterpreterStep } from '../../../src/evm/interpreter'
+import StatelessVerkleStateManager from '../../../src/state/statelessVerkleStateManager'
+import VM from '../../../src'
+import { DefaultStateManager } from '../../../src/state'
 
 function parseTestCases(
   forkConfigTestSuite: string,
@@ -74,9 +77,16 @@ async function runTestCase(options: any, testData: any, t: tape.Test) {
 
   const common = new Common({ chain: Chain.Mainnet, hardfork, eips })
 
-  const vm = new VM({ state, common })
+  let vm: VM
+  if (options.stateless) {
+    const stateManager = new StatelessVerkleStateManager({ common })
+    await stateManager.initPreState(getVerklePreState(testData))
+    vm = new VM({ stateManager, common })
+  } else {
+    vm = new VM({ state, common })
+    await setupPreConditions((vm.stateManager as DefaultStateManager)._trie, testData)
+  }
 
-  await setupPreConditions(vm.stateManager._trie, testData)
   let execInfo = ''
   let tx
 
@@ -110,10 +120,12 @@ async function runTestCase(options: any, testData: any, t: tape.Test) {
           t.comment(JSON.stringify(opTrace))
         })
         vm.on('afterTx', async () => {
-          const stateRoot = {
-            stateRoot: vm.stateManager._trie.root.toString('hex'),
+          if (!options.stateless) {
+            const stateRoot = {
+              stateRoot: (vm.stateManager as DefaultStateManager)._trie.root.toString('hex'),
+            }
+            t.comment(JSON.stringify(stateRoot))
           }
-          t.comment(JSON.stringify(stateRoot))
         })
       }
       try {
@@ -127,14 +139,18 @@ async function runTestCase(options: any, testData: any, t: tape.Test) {
     }
   }
 
-  const stateManagerStateRoot = vm.stateManager._trie.root
-  const testDataPostStateRoot = toBuffer(testData.postStateRoot)
-  const stateRootsAreEqual = stateManagerStateRoot.equals(testDataPostStateRoot)
-
   const end = Date.now()
   const timeSpent = `${(end - begin) / 1000} secs`
 
-  t.ok(stateRootsAreEqual, `[ ${timeSpent} ] the state roots should match (${execInfo})`)
+  if (!options.stateless) {
+    const stateManagerStateRoot = (vm.stateManager as DefaultStateManager)._trie.root
+    const testDataPostStateRoot = toBuffer(testData.postStateRoot)
+    const stateRootsAreEqual = stateManagerStateRoot.equals(testDataPostStateRoot)
+    t.ok(stateRootsAreEqual, `[ ${timeSpent} ] the state roots should match (${execInfo})`)
+  } else {
+    t.pass(`[ ${timeSpent} ] no state root comparison in stateless mode (${execInfo})`)
+  }
+
   return parseFloat(timeSpent)
 }
 

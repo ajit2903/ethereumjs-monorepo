@@ -32,6 +32,7 @@ import blockchainTestsRunner from './runners/BlockchainTestsRunner'
  * --customTestsPath: custom directory to look for tests (e.g. '../../my_custom_test_folder')
  * --customStateTest: run a file with a custom state test (not in test directory)
  * --jsontrace: enable json step tracing in state tests
+ * --stateless: run in stateless mode using StatelessVerkleStateManager (no state root comparison)
  * --dist: use the compiled version of the VM
  * --data: only run this state test if the transaction has this calldata
  * --gas: only run this state test if the transaction has this gasLimit
@@ -86,6 +87,7 @@ async function runTests() {
   runnerArgs.forkConfigTestSuite = FORK_CONFIG_TEST_SUITE
   runnerArgs.common = getCommon(FORK_CONFIG_VM)
   runnerArgs.jsontrace = argv.jsontrace
+  runnerArgs.stateless = argv.stateless
   runnerArgs.dist = argv.dist
   runnerArgs.data = argv.data // GeneralStateTests
   runnerArgs.gasLimit = argv.gas // GeneralStateTests

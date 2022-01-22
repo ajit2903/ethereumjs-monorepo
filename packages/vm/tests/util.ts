@@ -16,6 +16,7 @@ import {
   setLengthLeft,
   toBuffer,
 } from 'ethereumjs-util'
+import { State } from '../src/state/statelessVerkleStateManager'
 
 export function dumpState(state: any, cb: Function) {
   function readAccounts(state: any) {
@@ -345,6 +346,38 @@ export async function setupPreConditions(state: any, testData: any) {
     await state.put(addressBuf, account.serialize())
   }
   await state.commit()
+}
+
+/**
+ * setupPreConditions given JSON testData
+ * @param state - the state DB/trie
+ * @param testData - JSON from tests repo
+ */
+export function getVerklePreState(testData: any): State {
+  const preState: State = {
+    accounts: {},
+    code: {},
+    storage: {},
+  }
+
+  for (const address of Object.keys(testData.pre)) {
+    const { nonce, balance, code, storage } = testData.pre[address]
+
+    const codeBuf = format(code)
+    const codeHash = keccak256(codeBuf)
+    const codeHashStr = `0x${codeHash.toString('hex')}`
+
+    const account = Account.fromAccountData({ nonce, balance, codeHash })
+    preState.accounts[address] = account.serialize().toString('hex')
+    if (codeBuf.length > 0) {
+      preState.code[codeHashStr] = codeBuf.toString('hex')
+    }
+
+    for (const key in storage) {
+      preState.storage[address][key.slice(2)] = storage[key].slice(2)
+    }
+  }
+  return preState
 }
 
 /**
