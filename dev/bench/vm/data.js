@@ -1,67 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1643103082509,
+  "lastUpdate": 1643105432781,
   "repoUrl": "https://github.com/ethereumjs/ethereumjs-monorepo",
   "entries": {
     "Benchmark": [
-      {
-        "commit": {
-          "author": {
-            "email": "77563348+emersonmacro@users.noreply.github.com",
-            "name": "emersonmacro",
-            "username": "emersonmacro"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "ddf21a50302e13c957c2a6f07d8f23d5169718e1",
-          "message": "monorepo, vm: remove npm vulnerabilities (#1579)\n\n* vm: update tap-spec package\r\n\r\n* monorepo: remove old npm-auth-to-token package\r\n\r\n* monorepo: fix npm login in e2e-publish script\r\n\r\n* monorepo: troubleshooting npm login\r\n\r\n* monorepo: troubleshooting npm login\r\n\r\n* monorepo: troubleshooting npm login\r\n\r\n* monorepo: cleanup in e2e-publish script\r\n\r\n* monorepo: remove unused npm login package\r\n\r\n* vm: remove tap-spec completely, make formatTest script generic",
-          "timestamp": "2021-11-23T18:12:01+01:00",
-          "tree_id": "3ce69ac9b55f53de626a8e70b17c6d34141194d0",
-          "url": "https://github.com/ethereumjs/ethereumjs-monorepo/commit/ddf21a50302e13c957c2a6f07d8f23d5169718e1"
-        },
-        "date": 1637687859328,
-        "tool": "benchmarkjs",
-        "benches": [
-          {
-            "name": "Block 9422905",
-            "value": 11816,
-            "range": "±5.39%",
-            "unit": "ops/sec",
-            "extra": "74 samples"
-          },
-          {
-            "name": "Block 9422906",
-            "value": 12384,
-            "range": "±2.89%",
-            "unit": "ops/sec",
-            "extra": "78 samples"
-          },
-          {
-            "name": "Block 9422907",
-            "value": 11166,
-            "range": "±9.94%",
-            "unit": "ops/sec",
-            "extra": "69 samples"
-          },
-          {
-            "name": "Block 9422908",
-            "value": 12214,
-            "range": "±3.15%",
-            "unit": "ops/sec",
-            "extra": "80 samples"
-          },
-          {
-            "name": "Block 9422910",
-            "value": 12207,
-            "range": "±3.23%",
-            "unit": "ops/sec",
-            "extra": "78 samples"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -1770,6 +1711,65 @@ window.BENCHMARK_DATA = {
             "range": "±14.37%",
             "unit": "ops/sec",
             "extra": "47 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "Holger.Drewes@gmail.com",
+            "name": "Holger Drewes",
+            "username": "holgerd77"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c4cc93002f45bbed46acb07cd12d0475c1269599",
+          "message": "vm, client: removed ProofStateManager interface, added optional getProof, verifyProof methods to StateManager interface (#1660)",
+          "timestamp": "2022-01-25T11:06:17+01:00",
+          "tree_id": "8812d4bb4d27030a0fcf2ebd01a6589f3762fd96",
+          "url": "https://github.com/ethereumjs/ethereumjs-monorepo/commit/c4cc93002f45bbed46acb07cd12d0475c1269599"
+        },
+        "date": 1643105432193,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Block 9422905",
+            "value": 19888,
+            "range": "±5.00%",
+            "unit": "ops/sec",
+            "extra": "75 samples"
+          },
+          {
+            "name": "Block 9422906",
+            "value": 17398,
+            "range": "±9.40%",
+            "unit": "ops/sec",
+            "extra": "66 samples"
+          },
+          {
+            "name": "Block 9422907",
+            "value": 20668,
+            "range": "±1.77%",
+            "unit": "ops/sec",
+            "extra": "77 samples"
+          },
+          {
+            "name": "Block 9422908",
+            "value": 20308,
+            "range": "±2.72%",
+            "unit": "ops/sec",
+            "extra": "78 samples"
+          },
+          {
+            "name": "Block 9422910",
+            "value": 12293,
+            "range": "±13.79%",
+            "unit": "ops/sec",
+            "extra": "48 samples"
           }
         ]
       }
