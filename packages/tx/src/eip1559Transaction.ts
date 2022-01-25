@@ -1,14 +1,16 @@
 import {
+  arrToBufArr,
   BN,
   bnToHex,
   bnToUnpaddedBuffer,
+  bufArrToArr,
   ecrecover,
   keccak256,
   MAX_INTEGER,
-  rlp,
   toBuffer,
   validateNoLeadingZeroes,
 } from 'ethereumjs-util'
+import RLP from 'rlp'
 import Common from '@ethereumjs/common'
 import { BaseTransaction } from './baseTransaction'
 import {
@@ -104,7 +106,7 @@ export default class FeeMarketEIP1559Transaction extends BaseTransaction<FeeMark
       )
     }
 
-    const values = rlp.decode(serialized.slice(1))
+    const values = arrToBufArr(RLP.decode(serialized.slice(1)))
 
     if (!Array.isArray(values)) {
       throw new Error('Invalid serialized tx input: must be array')
@@ -314,7 +316,10 @@ export default class FeeMarketEIP1559Transaction extends BaseTransaction<FeeMark
    */
   serialize(): Buffer {
     const base = this.raw()
-    return Buffer.concat([TRANSACTION_TYPE_BUFFER, rlp.encode(base as any)])
+    return Buffer.concat([
+      TRANSACTION_TYPE_BUFFER,
+      Buffer.from(RLP.encode(bufArrToArr(base as Buffer[]))),
+    ])
   }
 
   /**
@@ -332,7 +337,10 @@ export default class FeeMarketEIP1559Transaction extends BaseTransaction<FeeMark
    */
   getMessageToSign(hashMessage = true): Buffer {
     const base = this.raw().slice(0, 9)
-    const message = Buffer.concat([TRANSACTION_TYPE_BUFFER, rlp.encode(base as any)])
+    const message = Buffer.concat([
+      TRANSACTION_TYPE_BUFFER,
+      Buffer.from(RLP.encode(bufArrToArr(base as Buffer[]))),
+    ])
     if (hashMessage) {
       return keccak256(message)
     } else {
