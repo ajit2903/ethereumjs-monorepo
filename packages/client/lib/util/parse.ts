@@ -7,7 +7,6 @@ import {
   Account,
   BN,
   keccak,
-  rlp,
   toBuffer,
   unpadBuffer,
   isHexPrefixed,
@@ -16,6 +15,7 @@ import {
   bufferToHex,
   addHexPrefix,
 } from 'ethereumjs-util'
+import RLP from 'rlp'
 import type { MultiaddrLike } from '../types'
 import type { GenesisState } from '@ethereumjs/common/dist/types'
 
@@ -93,8 +93,12 @@ async function createStorageTrie(storage: any) {
   const trie = new Trie()
   for (const [address, value] of Object.entries(storage) as unknown as [string, string]) {
     const key = isHexPrefixed(address) ? toBuffer(address) : Buffer.from(address, 'hex')
-    const val = rlp.encode(
-      unpadBuffer(isHexPrefixed(value) ? toBuffer(value) : Buffer.from(value, 'hex'))
+    const val = Buffer.from(
+      RLP.encode(
+        Uint8Array.from(
+          unpadBuffer(isHexPrefixed(value) ? toBuffer(value) : Buffer.from(value, 'hex'))
+        )
+      )
     )
     await trie.put(key, val)
   }
