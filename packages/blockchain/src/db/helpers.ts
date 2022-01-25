@@ -1,5 +1,6 @@
 import { DBOp, DBTarget } from './operation'
-import { BN, rlp } from 'ethereumjs-util'
+import { BN, bufArrToArr } from 'ethereumjs-util'
+import RLP from 'rlp'
 import { Block, BlockHeader } from '@ethereumjs/block'
 import { bufBE8 } from './constants'
 
@@ -9,10 +10,14 @@ import { bufBE8 } from './constants'
  */
 
 function DBSetTD(TD: BN, blockNumber: BN, blockHash: Buffer): DBOp {
-  return DBOp.set(DBTarget.TotalDifficulty, rlp.encode(TD), {
-    blockNumber,
-    blockHash,
-  })
+  return DBOp.set(
+    DBTarget.TotalDifficulty,
+    Buffer.from(RLP.encode(Uint8Array.from(TD.toArray()))),
+    {
+      blockNumber,
+      blockHash,
+    }
+  )
 }
 
 /*
@@ -43,7 +48,7 @@ function DBSetBlockOrHeader(blockBody: Block | BlockHeader): DBOp[] {
     isGenesis ||
     (blockBody instanceof Block && (blockBody.transactions.length || blockBody.uncleHeaders.length))
   ) {
-    const bodyValue = rlp.encode(blockBody.raw().slice(1))
+    const bodyValue = Buffer.from(RLP.encode(bufArrToArr(blockBody.raw()).slice(1)))
     dbOps.push(
       DBOp.set(DBTarget.Body, bodyValue, {
         blockNumber,
