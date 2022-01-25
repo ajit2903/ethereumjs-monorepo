@@ -1,4 +1,5 @@
-import { keccak256, rlp } from 'ethereumjs-util'
+import { arrToBufArr, bufArrToArr, keccak256 } from 'ethereumjs-util'
+import RLP from 'rlp'
 import { bufferToNibbles, nibblesToBuffer } from './util/nibbles'
 import { isTerminator, addHexPrefix, removeHexPrefix } from './util/hex'
 
@@ -41,7 +42,7 @@ export class BranchNode {
   }
 
   serialize(): Buffer {
-    return rlp.encode(this.raw())
+    return Buffer.from(RLP.encode(bufArrToArr(this.raw() as Buffer[])))
   }
 
   hash(): Buffer {
@@ -111,7 +112,7 @@ export class ExtensionNode {
   }
 
   serialize(): Buffer {
-    return rlp.encode(this.raw())
+    return Buffer.from(RLP.encode(bufArrToArr(this.raw())))
   }
 
   hash(): Buffer {
@@ -161,7 +162,7 @@ export class LeafNode {
   }
 
   serialize(): Buffer {
-    return rlp.encode(this.raw())
+    return Buffer.from(RLP.encode(bufArrToArr(this.raw())))
   }
 
   hash(): Buffer {
@@ -184,7 +185,7 @@ export function decodeRawNode(raw: Buffer[]): TrieNode {
 }
 
 export function decodeNode(raw: Buffer): TrieNode {
-  const des = rlp.decode(raw)
+  const des = arrToBufArr(RLP.decode(Uint8Array.from(raw))) as Buffer[]
   if (!Array.isArray(des)) {
     throw new Error('Invalid node')
   }
