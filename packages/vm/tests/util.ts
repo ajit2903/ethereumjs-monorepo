@@ -9,14 +9,15 @@ import {
 } from '@ethereumjs/tx'
 import {
   Account,
-  BN,
-  rlp,
-  keccak256,
-  stripHexPrefix,
-  setLengthLeft,
-  toBuffer,
   Address,
+  BN,
+  bufferToHex,
+  keccak256,
+  setLengthLeft,
+  stripHexPrefix,
+  toBuffer,
 } from 'ethereumjs-util'
+import RLP from 'rlp'
 import { DefaultStateManager } from '../src/state'
 
 export function dumpState(state: any, cb: Function) {
@@ -197,7 +198,7 @@ export function verifyAccountPostConditions(
       const rs = state.createReadStream()
       rs.on('data', function (data: any) {
         let key = data.key.toString('hex')
-        const val = '0x' + rlp.decode(data.value).toString('hex')
+        const val = bufferToHex(Buffer.from(RLP.decode(Uint8Array.from(data.value)) as Uint8Array))
 
         if (key === '0x') {
           key = '0x00'
@@ -326,7 +327,7 @@ export async function setupPreConditions(state: DefaultStateManager, testData: a
       if (valBN.isZero()) {
         continue
       }
-      const val = valBN.toArrayLike(Buffer, 'be')
+      const val = Buffer.from(RLP.encode(Uint8Array.from(valBN.toArray())))
       const key = setLengthLeft(format(storageKey), 32)
 
       await state.putContractStorage(address, key, val)
