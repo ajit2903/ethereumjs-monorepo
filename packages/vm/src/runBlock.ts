@@ -490,6 +490,8 @@ export async function generateTxReceipt(
       } as PostByzantiumTxReceipt
       const statusInfo = txRes.execResult.exceptionError ? 'error' : 'ok'
       receiptLog += ` status=${txReceipt.status} (${statusInfo}) (>= Byzantium)`
+      ;(txReceipt as any).status =
+        txReceipt.status === 0 ? Buffer.from([]) : Buffer.from('01', 'hex') // encode status as Buffer
     } else {
       // Pre-Byzantium
       const stateRoot = await this.stateManager.getStateRoot(true)
@@ -506,6 +508,7 @@ export async function generateTxReceipt(
       status: txRes.execResult.exceptionError ? 0 : 1,
       ...abstractTxReceipt,
     } as PostByzantiumTxReceipt
+    ;(txReceipt as any).status = txReceipt.status === 0 ? Buffer.from([]) : Buffer.from('01', 'hex') // encode status as Buffer
     encodedReceipt = Buffer.concat([
       intToBuffer(tx.type),
       Buffer.from(RLP.encode(bufArrToArr(Object.values(txReceipt)))),

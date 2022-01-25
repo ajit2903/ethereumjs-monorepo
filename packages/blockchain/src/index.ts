@@ -684,7 +684,7 @@ export default class Blockchain implements BlockchainInterface {
       v[0].toArrayLike(Buffer),
       [v[1][0].toBuffer(), v[1][1].toBuffer(), v[1][2]],
     ])
-    dbOps.push(DBOp.set(DBTarget.CliqueVotes, rlp.encode(formatted)))
+    dbOps.push(DBOp.set(DBTarget.CliqueVotes, Buffer.from(RLP.encode(bufArrToArr(formatted)))))
 
     await this.dbManager.batch(dbOps)
   }

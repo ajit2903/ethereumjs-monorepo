@@ -3,10 +3,9 @@ import {
   BN,
   bnToHex,
   bnToUnpaddedBuffer,
-  bufArrToArr
+  bufArrToArr,
   ecrecover,
   MAX_INTEGER,
-  rlp,
   rlphash,
   toBuffer,
   unpadBuffer,

@@ -270,6 +270,7 @@ tape('[Block]: Header functions', function (t) {
 
     const genesisRlp = toBuffer(testData.genesisRLP)
     const block = Block.fromRLPSerializedBlock(genesisRlp, { common })
+    await blockchain.putBlock(block)
 
     headerData.number = 1
     headerData.timestamp = new BN(1422494850)

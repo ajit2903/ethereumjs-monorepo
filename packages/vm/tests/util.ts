@@ -327,7 +327,7 @@ export async function setupPreConditions(state: DefaultStateManager, testData: a
       if (valBN.isZero()) {
         continue
       }
-      const val = Buffer.from(RLP.encode(Uint8Array.from(valBN.toArray())))
+      const val = valBN.toArrayLike(Buffer, 'be')
       const key = setLengthLeft(format(storageKey), 32)
 
       await state.putContractStorage(address, key, val)

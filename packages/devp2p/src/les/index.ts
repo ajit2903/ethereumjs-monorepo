@@ -188,7 +188,7 @@ export class LES extends EventEmitter {
 
     const statusList: any[][] = []
     Object.keys(status).forEach((key) => {
-      statusList.push([key, status[key]])
+      statusList.push([Buffer.from(key), status[key]])
     })
 
     this.debug(
