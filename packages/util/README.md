@@ -45,8 +45,6 @@ Read the [API docs](docs/).
     - e.g. `KECCAK256_NULL_S` for string representation of Keccak-256 hash of null
 - [hash](src/hash.ts)
   - Hash functions
-- [object](src/object.ts)
-  - Helper function for creating a binary object (`DEPRECATED`)
 - [signature](src/signature.ts)
   - Signing, signature validation, conversion, recovery
 - [types](src/types.ts)
