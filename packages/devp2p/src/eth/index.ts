@@ -3,9 +3,9 @@ import { EventEmitter } from 'events'
 import ms from 'ms'
 import snappy from 'snappyjs'
 import { debug as createDebugLogger, Debugger } from 'debug'
-import { devp2pDebug } from '../util'
-import { BN, rlp } from 'ethereumjs-util'
-import { int2buffer, buffer2int, assertEq, formatLogId, formatLogData } from '../util'
+import { arrToBufArr, bufArrToArr, BN } from 'ethereumjs-util'
+import RLP from 'rlp'
+import { int2buffer, buffer2int, assertEq, formatLogId, formatLogData, devp2pDebug } from '../util'
 import { Peer, DISCONNECT_REASONS } from '../rlpx/peer'
 
 const DEBUG_BASE_NAME = 'eth'
@@ -72,7 +72,7 @@ export class ETH extends EventEmitter {
   static eth66 = { name: 'eth', version: 66, length: 29, constructor: ETH }
 
   _handleMessage(code: ETH.MESSAGE_CODES, data: any) {
-    const payload = rlp.decode(data) as unknown
+    const payload = arrToBufArr(RLP.decode(bufArrToArr(data)))
     const messageName = this.getMsgPrefix(code)
     const debugMsg = `Received ${messageName} message from ${this._peer._socket.remoteAddress}:${this._peer._socket.remotePort}`
 
@@ -278,7 +278,7 @@ export class ETH extends EventEmitter {
       } (eth${this._version}): ${this._getStatusString(this._status)}`
     )
 
-    let payload = rlp.encode(this._status as any)
+    let payload = Buffer.from(RLP.encode(bufArrToArr(this._status)))
 
     // Use snappy compression if peer supports DevP2P >=v5
     if (this._peer._hello?.protocolVersion && this._peer._hello?.protocolVersion >= 5) {
@@ -291,7 +291,10 @@ export class ETH extends EventEmitter {
 
   sendMessage(code: ETH.MESSAGE_CODES, payload: any) {
     const messageName = this.getMsgPrefix(code)
-    const logData = formatLogData(rlp.encode(payload).toString('hex'), verbose)
+    const logData = formatLogData(
+      Buffer.from(RLP.encode(bufArrToArr(payload))).toString('hex'),
+      verbose
+    )
     const debugMsg = `Send ${messageName} message to ${this._peer._socket.remoteAddress}:${this._peer._socket.remotePort}: ${logData}`
 
     this.debug(messageName, debugMsg)
@@ -327,7 +330,7 @@ export class ETH extends EventEmitter {
         throw new Error(`Unknown code ${code}`)
     }
 
-    payload = rlp.encode(payload)
+    payload = Buffer.from(RLP.encode(bufArrToArr(payload)))
 
     // Use snappy compression if peer supports DevP2P >=v5
     if (this._peer._hello?.protocolVersion && this._peer._hello?.protocolVersion >= 5) {

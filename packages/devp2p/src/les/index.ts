@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
-import { rlp } from 'ethereumjs-util'
+import { arrToBufArr, bufArrToArr } from 'ethereumjs-util'
+import RLP from 'rlp'
 import ms from 'ms'
 import snappy from 'snappyjs'
 import { debug as createDebugLogger, Debugger } from 'debug'
@@ -51,7 +52,7 @@ export class LES extends EventEmitter {
   static les4 = { name: 'les', version: 4, length: 23, constructor: LES }
 
   _handleMessage(code: LES.MESSAGE_CODES, data: any) {
-    const payload = rlp.decode(data)
+    const payload = arrToBufArr(RLP.decode(bufArrToArr(data)))
     const messageName = this.getMsgPrefix(code)
     const debugMsg = `Received ${messageName} message from ${this._peer._socket.remoteAddress}:${this._peer._socket.remotePort}`
 
@@ -197,7 +198,7 @@ export class LES extends EventEmitter {
       } (les${this._version}): ${this._getStatusString(this._status)}`
     )
 
-    let payload = rlp.encode(statusList)
+    let payload = Buffer.from(RLP.encode(bufArrToArr(statusList)))
 
     // Use snappy compression if peer supports DevP2P >=v5
     if (this._peer._hello?.protocolVersion && this._peer._hello?.protocolVersion >= 5) {
@@ -215,7 +216,10 @@ export class LES extends EventEmitter {
    */
   sendMessage(code: LES.MESSAGE_CODES, payload: any) {
     const messageName = this.getMsgPrefix(code)
-    const logData = formatLogData(rlp.encode(payload).toString('hex'), verbose)
+    const logData = formatLogData(
+      Buffer.from(RLP.encode(bufArrToArr(payload))).toString('hex'),
+      verbose
+    )
     const debugMsg = `Send ${messageName} message to ${this._peer._socket.remoteAddress}:${this._peer._socket.remotePort}: ${logData}`
 
     this.debug(messageName, debugMsg)
@@ -257,7 +261,7 @@ export class LES extends EventEmitter {
         throw new Error(`Unknown code ${code}`)
     }
 
-    payload = rlp.encode(payload)
+    payload = Buffer.from(RLP.encode(payload))
 
     // Use snappy compression if peer supports DevP2P >=v5
     if (this._peer._hello?.protocolVersion && this._peer._hello?.protocolVersion >= 5) {
