@@ -29,7 +29,7 @@ tape('runBlock() -> successful API parameter usage', async (t) => {
     const block = Block.fromRLPSerializedBlock(blockRlp)
 
     //@ts-ignore
-    await setupPreConditions(vm.stateManager._trie, testData)
+    await setupPreConditions(vm.stateManager, testData)
 
     st.ok(
       //@ts-ignore
@@ -45,7 +45,7 @@ tape('runBlock() -> successful API parameter usage', async (t) => {
     })
 
     st.equal(
-      res.results[0].gasUsed.toString('hex'),
+      res.results[0].gasUsed.toString(16),
       '5208',
       'actual gas used should equal blockHeader gasUsed'
     )
@@ -55,7 +55,7 @@ tape('runBlock() -> successful API parameter usage', async (t) => {
     const testData = require('./testdata/uncleData.json')
 
     //@ts-ignore
-    await setupPreConditions(vm.stateManager._trie, testData)
+    await setupPreConditions(vm.stateManager, testData)
 
     const block1Rlp = testData.blocks[0].rlp
     const block1 = Block.fromRLPSerializedBlock(block1Rlp)
@@ -175,11 +175,11 @@ tape('runBlock() -> successful API parameter usage', async (t) => {
       generate: true,
     })
     st.ok(
-      txResultChainstart.results[0].gasUsed.toNumber() == 21000 + 68 * 3 + 3 + 50,
+      txResultChainstart.results[0].gasUsed === 21000n + 68n * 3n + 3n + 50n,
       'tx charged right gas on chainstart hard fork'
     )
     st.ok(
-      txResultMuirGlacier.results[0].gasUsed.toNumber() == 21000 + 32000 + 16 * 3 + 3 + 800,
+      txResultMuirGlacier.results[0].gasUsed === 21000n + 32000n + 16n * 3n + 3n + 800n,
       'tx charged right gas on muir glacier hard fork'
     )
   })
@@ -264,7 +264,7 @@ tape('runBlock() -> runtime behavior', async (t) => {
     block1[0][12] = Buffer.from('dao-hard-fork')
     const block = Block.fromValuesArray(block1)
     // @ts-ignore
-    await setupPreConditions(vm.stateManager._trie, testData)
+    await setupPreConditions(vm.stateManager, testData)
 
     // fill two original DAO child-contracts with funds and the recovery account with funds in order to verify that the balance gets summed correctly
     const fundBalance1 = new BN(Buffer.from('1111', 'hex'))
@@ -404,7 +404,7 @@ async function runWithHf(hardfork: string) {
   const block = Block.fromRLPSerializedBlock(blockRlp)
 
   // @ts-ignore
-  await setupPreConditions(vm.stateManager._trie, testData)
+  await setupPreConditions(vm.stateManager, testData)
 
   const res = await vm.runBlock({
     block,
@@ -449,7 +449,7 @@ tape('runBlock() -> tx types', async (t) => {
     }
 
     //@ts-ignore
-    await setupPreConditions(vm.stateManager._trie, testData)
+    await setupPreConditions(vm.stateManager, testData)
 
     const res = await vm.runBlock({
       block,
@@ -458,11 +458,16 @@ tape('runBlock() -> tx types', async (t) => {
     })
 
     st.ok(
-      res.gasUsed.eq(
+      res.gasUsed ===
+      BigInt(
         res.receipts
           .map((r) => r.gasUsed)
-          .reduce((prevValue: BN, currValue: Buffer) => prevValue.add(new BN(currValue)), new BN(0))
-      ),
+            .reduce(
+              (prevValue: BN, currValue: Buffer) => prevValue.add(new BN(currValue)),
+              new BN(0)
+            )
+            .toString(10)
+        ),
       "gas used should equal transaction's total gasUsed"
     )
   }

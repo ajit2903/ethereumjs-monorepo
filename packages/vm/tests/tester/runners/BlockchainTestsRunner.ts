@@ -3,7 +3,7 @@ import { Block } from '@ethereumjs/block'
 import Blockchain from '@ethereumjs/blockchain'
 import Common, { ConsensusAlgorithm } from '@ethereumjs/common'
 import { TransactionFactory } from '@ethereumjs/tx'
-import { addHexPrefix, BN, toBuffer, rlp } from 'ethereumjs-util'
+import { addHexPrefix, toBuffer, rlp, bufferToHex } from 'ethereumjs-util'
 import { SecureTrie as Trie } from 'merkle-patricia-tree'
 import { setupPreConditions, verifyPostConditions } from '../../util'
 
@@ -81,7 +81,7 @@ export default async function runBlockchainTest(options: any, testData: any, t: 
   await blockchain.initPromise
 
   // set up pre-state
-  await setupPreConditions(vm.stateManager._trie, testData)
+  await setupPreConditions(vm.stateManager, testData)
 
   t.ok(vm.stateManager._trie.root.equals(genesisBlock.header.stateRoot), 'correct pre stateRoot')
 
@@ -93,7 +93,7 @@ export default async function runBlockchainTest(options: any, testData: any, t: 
     }
   }
 
-  let currentBlock = new BN(0)
+  let currentBlock = 0n
   for (const raw of testData.blocks) {
     const paramFork = `expectException${options.forkConfigTestSuite}`
     // Two naming conventions in ethereum/tests to indicate "exception occurs on all HFs" semantics
@@ -109,7 +109,7 @@ export default async function runBlockchainTest(options: any, testData: any, t: 
     try {
       const blockRlp = Buffer.from(raw.rlp.slice(2), 'hex')
       const decodedRLP: any = rlp.decode(blockRlp)
-      currentBlock = new BN(decodedRLP[0][8])
+      currentBlock = BigInt(bufferToHex(decodedRLP[0][8]))
     } catch (e: any) {
       await handleError(e, expectException)
       continue
@@ -117,7 +117,7 @@ export default async function runBlockchainTest(options: any, testData: any, t: 
 
     try {
       // Update common HF
-      common.setHardforkByBlockNumber(currentBlock.toNumber())
+      common.setHardforkByBlockNumber(Number(currentBlock))
 
       // transactionSequence is provided when txs are expected to be rejected.
       // To run this field we try to import them on the current state.
@@ -180,8 +180,11 @@ export default async function runBlockchainTest(options: any, testData: any, t: 
         return
       }
     } catch (error: any) {
+      if (options.debug) {
+        await verifyPostConditions(state, testData.postState, t)
+      }
       // caught an error, reduce block number
-      currentBlock.isubn(1)
+      currentBlock--
       await handleError(error, expectException)
     }
   }
